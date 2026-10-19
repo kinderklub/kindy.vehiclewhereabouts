@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="ms-MY" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Di Mana Kenderaan Bergerak? | Kinder Klub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Quicksand Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Quicksand', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              sun: '#FFB800',
+              sky: '#00B4D8',
+              grass: '#10B981',
+              berry: '#F72585',
+              navy: '#1E1B4B',
+              coral: '#FF6B6B',
+              cloud: '#F0F9FF',
+              lilac: '#7209B7'
+            }
+          },
+          boxShadow: {
+            'candy': '0 8px 0 rgba(0,0,0,0.2)',
+            'candy-sm': '0 4px 0 rgba(0,0,0,0.18)',
+            'candy-pressed': '0 2px 0 rgba(0,0,0,0.18)',
+            'glow-sky': '0 0 25px rgba(0, 180, 216, 0.6)',
+            'glow-gold': '0 0 25px rgba(245, 158, 11, 0.7)',
+            'glow-emerald': '0 0 30px rgba(16, 185, 129, 0.7)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      font-family: 'Quicksand', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    body {
+      touch-action: pan-y;
+      background-color: #0c4a6e;
+    }
+
+    /* Animasi terapung ceria maskot */
+    @keyframes float-gentle {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    .animate-float {
+      animation: float-gentle 3.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.97); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.97); opacity: 0.85; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    @keyframes wiggle-happy {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-6deg) scale(1.05); }
+      75% { transform: rotate(6deg) scale(1.05); }
+    }
+    .animate-wiggle {
+      animation: wiggle-happy 0.7s ease-in-out infinite;
+    }
+
+    @keyframes drive-dash {
+      to {
+        stroke-dashoffset: -40;
+      }
+    }
+    .animate-trail {
+      stroke-dasharray: 12 10;
+      animation: drive-dash 1s linear infinite;
+    }
+
+    /* Animasi roket / kenderaan meluncur ke portal */
+    @keyframes zoom-into-portal {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      40% { transform: scale(1.18) rotate(4deg); opacity: 1; }
+      80% { transform: scale(0.85) rotate(-3deg); opacity: 0.8; }
+      100% { transform: scale(0.1) rotate(15deg); opacity: 0; }
+    }
+    .drive-launching {
+      animation: zoom-into-portal 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    /* Pengurusan responsive latar belakang */
+    .bg-landscape-mode {
+      display: block;
+    }
+    .bg-portrait-mode {
+      display: none;
+    }
+    @media (orientation: portrait) {
+      .bg-landscape-mode {
+        display: none;
+      }
+      .bg-portrait-mode {
+        display: block;
+      }
+    }
+
+    /* Keutamaan gerakan dikurangkan */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Bar skrol tersuai untuk galeri */
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.45);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.65);
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden text-slate-800 antialiased bg-slate-900">
+
+  <div id="app" class="relative w-full h-full flex flex-col justify-between overflow-hidden">
+    
+    <div id="game-background" class="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+      <!-- Melintang (Landscape) -->
+      <img 
+        src="https://imglink.cc/cdn/sVKxor3wFi.jpeg" 
+        alt="Latar Belakang Melintang" 
+        class="bg-landscape-mode w-full h-full object-cover object-center"
+        onerror="this.style.display='none'; document.getElementById('svg-fallback-bg').style.display='block';"
+      />
+      <!-- Menegak (Portrait) -->
+      <img 
+        src="https://imglink.cc/cdn/NJXAduGnRm.jpeg" 
+        alt="Latar Belakang Menegak" 
+        class="bg-portrait-mode w-full h-full object-cover object-center"
+        onerror="this.style.display='none'; document.getElementById('svg-fallback-bg').style.display='block';"
+      />
+
+      <!-- Sandaran Ilustrasi SVG sekiranya talian internet tergendala -->
+      <div id="svg-fallback-bg" class="hidden absolute inset-0 w-full h-full">
+        <svg class="w-full h-full object-cover" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1440 900" fill="none">
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38BDF8"/>
+              <stop offset="60%" stop-color="#BAE6FD"/>
+              <stop offset="100%" stop-color="#FED7AA"/>
+            </linearGradient>
+          </defs>
+          <rect width="1440" height="900" fill="url(#skyGrad)"/>
+          <ellipse cx="220" cy="120" rx="90" ry="36" fill="#FFFFFF" opacity="0.8"/>
+          <ellipse cx="880" cy="90" rx="110" ry="40" fill="#FFFFFF" opacity="0.8"/>
+          <polygon points="0,600 350,420 700,600 1050,440 1440,600 1440,900 0,900" fill="#2DD4BF" opacity="0.6"/>
+          <path d="M0 680 Q 400 620 800 680 T 1440 680 L 1440 900 L 0 900 Z" fill="#10B981"/>
+          <rect y="780" width="1440" height="120" fill="#334155"/>
+        </svg>
+      </div>
+    </div>
+
+    <header class="relative z-20 flex items-center justify-between px-3 sm:px-6 py-2 bg-white/95 backdrop-blur-md border-b-4 border-amber-300 shadow-md">
+      <!-- Butang Laman Utama & Tajuk -->
+      <div class="flex items-center gap-2">
+        <button id="btn-header-home" onclick="navTo('home')" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-extrabold text-sm sm:text-base border-2 border-amber-500 shadow-candy-sm transition-all" aria-label="Laman Utama">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="nav_home">Laman Utama</span>
+        </button>
+        
+        <div class="flex flex-col ml-1">
+          <span class="text-[11px] sm:text-xs font-black tracking-wider text-rose-500 uppercase leading-none">Kinder Klub</span>
+          <span class="text-sm sm:text-lg font-extrabold text-sky-950 leading-tight" data-i18n="app_title">Di Mana Bergerak?</span>
+        </div>
+      </div>
+
+      <!-- Avatar Maskot Mini -->
+      <div class="hidden md:flex items-center gap-2 px-3 py-1 bg-amber-50 rounded-full border-2 border-amber-200 shadow-inner">
+        <img src="https://imglink.cc/cdn/Yw068zKv4x.png" alt="Maskot Si Panda" class="w-7 h-7 object-contain drop-shadow" onerror="this.src='https://placehold.co/40x40/FFB800/FFFFFF?text=Panda'">
+        <span class="text-xs font-bold text-amber-950" data-i18n="mascot_name">Si Panda Pengembara</span>
+      </div>
+
+      <!-- Alat Kawalan Bahasa, Profil & Koleksi -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Penukar Bahasa: BM Utama -->
+        <button id="btn-toggle-lang" onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-black text-xs sm:text-sm border-2 border-sky-600 shadow-candy-sm flex items-center gap-1.5" aria-label="Tukar Bahasa">
+          <span id="lang-indicator" class="tracking-widest font-black">BM</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+        </button>
+
+        <!-- Butang Profil Pemain -->
+        <button onclick="navTo('profile')" class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-purple-500 hover:bg-purple-600 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-purple-600 shadow-candy-sm flex items-center gap-1.5" aria-label="Profil">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          <span class="hidden lg:inline" data-i18n="nav_profile">Profil</span>
+        </button>
+
+        <!-- Butang Koleksi 36 Kenderaan -->
+        <button onclick="navTo('collection')" class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-emerald-600 shadow-candy-sm flex items-center gap-1.5" aria-label="Koleksi">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="nav_collection">Koleksi</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="relative z-10 flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center p-2 sm:p-4">
+
+      <!-- ==================== 1. SKRIN UTAMA (HOME) ==================== -->
+      <section id="screen-home" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center py-2 sm:py-4 my-auto">
+        <!-- Maskot Rasmi Si Panda -->
+        <div class="relative w-36 h-36 sm:w-52 sm:h-52 mb-2 animate-float">
+          <img 
+            src="https://imglink.cc/cdn/Yw068zKv4x.png" 
+            alt="Si Panda Pengembara" 
+            class="w-full h-full object-contain drop-shadow-2xl"
+            onerror="this.src='https://placehold.co/200x200/FFB800/FFFFFF?text=Baby+Panda'"
+          />
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 border-4 border-amber-300 shadow-2xl max-w-xl w-full mx-auto">
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-sky-950 tracking-tight mb-2" data-i18n="home_title">
+            Di Mana Kenderaan Bergerak?
+          </h1>
+          <p class="text-slate-600 font-semibold text-sm sm:text-base mb-6 leading-relaxed" data-i18n="home_desc">
+            Bantu Si Panda Pengembara memadankan 36 kenderaan ke laluan perjalanannya yang betul!
+          </p>
+
+          <!-- Butang Tindakan Pantas -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <button onclick="navTo('session')" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-amber-950 font-black text-lg sm:text-xl border-3 border-amber-500 shadow-candy flex items-center justify-center gap-2 transition-transform">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <span data-i18n="btn_play">Mula Main</span>
+            </button>
+
+            <button onclick="navTo('instructions')" class="w-full py-3.5 px-6 rounded-2xl bg-sky-400 hover:bg-sky-500 active:scale-95 text-white font-extrabold text-base sm:text-lg border-3 border-sky-500 shadow-candy flex items-center justify-center gap-2 transition-transform">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+              </svg>
+              <span data-i18n="btn_instructions">Panduan</span>
+            </button>
+          </div>
+
+          <div class="mt-4 pt-4 border-t-2 border-slate-100 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <button onclick="navTo('collection')" class="px-3.5 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xs sm:text-sm border border-emerald-300">
+              <span data-i18n="btn_view_collection">Galeri 36 Kenderaan</span>
+            </button>
+            <button onclick="navTo('family_code')" class="px-3.5 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold text-xs sm:text-sm border border-purple-300">
+              <span data-i18n="btn_family_code">Kod Keluarga</span>
+            </button>
+            <button onclick="navTo('student_profile')" class="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs sm:text-sm border border-amber-300">
+              <span data-i18n="btn_student_profile">Profil Murid</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 2. SKRIN PANDUAN BERMAIN ==================== -->
+      <section id="screen-instructions" class="hidden w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 border-4 border-sky-300 shadow-2xl my-auto">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-sky-100 border-2 border-sky-300 flex items-center justify-center text-sky-600">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-sky-950" data-i18n="instr_title">Panduan Bermain</h2>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500" data-i18n="instr_subtitle">Mudah, Seronok & Interaktif!</p>
+          </div>
+        </div>
+
+        <div class="space-y-3.5 mb-6 text-slate-700 font-medium text-sm sm:text-base">
+          <div class="flex items-start gap-3 p-3 bg-sky-50 rounded-2xl border border-sky-200">
+            <div class="w-7 h-7 rounded-full bg-sky-500 text-white font-extrabold flex items-center justify-center flex-shrink-0 text-sm">1</div>
+            <p data-i18n="instr_step1">Pegang dan pandu kenderaan dengan menarik garisan terus ke arah portal laluan yang betul.</p>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-2xl border border-amber-200">
+            <div class="w-7 h-7 rounded-full bg-amber-500 text-amber-950 font-extrabold flex items-center justify-center flex-shrink-0 text-sm">2</div>
+            <p data-i18n="instr_step2">Anda juga boleh menekan kenderaan lalu menekan pintu laluan destinasi untuk melancarkannya.</p>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
+            <div class="w-7 h-7 rounded-full bg-emerald-500 text-white font-extrabold flex items-center justify-center flex-shrink-0 text-sm">3</div>
+            <p data-i18n="instr_step3">Setiap sambungan yang betul diberi +10 mata! Kenderaan akan meluncur terus ke destinasinya.</p>
+          </div>
+        </div>
+
+        <button onclick="navTo('session')" class="w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-black text-lg border-3 border-amber-500 shadow-candy">
+          <span data-i18n="btn_understood">Saya Faham, Jom Main!</span>
+        </button>
+      </section>
+
+      <!-- ==================== 3. SKRIN PILIHAN SESI ==================== -->
+      <section id="screen-session" class="hidden w-full max-w-xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 border-4 border-amber-300 shadow-2xl my-auto text-center">
+        <h2 class="text-2xl sm:text-3xl font-black text-sky-950 mb-2" data-i18n="session_title">Pilih Bilangan Soalan</h2>
+        <p class="text-slate-600 font-semibold text-sm mb-6" data-i18n="session_subtitle">Pilih panjang sesi aktiviti yang anda gemari</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+          <button onclick="startGame(5)" class="p-4 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-95 border-3 border-sky-300 shadow-candy flex flex-col items-center text-center transition-all">
+            <span class="text-3xl font-black text-sky-600 mb-1">5</span>
+            <span class="font-extrabold text-sky-950 text-base" data-i18n="session_opt_quick">Pantas</span>
+            <span class="text-xs text-slate-500 font-semibold" data-i18n="session_sub_quick">5 Soalan</span>
+          </button>
+
+          <button onclick="startGame(10)" class="p-4 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-95 border-3 border-amber-400 shadow-candy flex flex-col items-center text-center relative overflow-hidden transition-all">
+            <div class="absolute top-1 right-1 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full" data-i18n="badge_popular">Pilihan Ramai</div>
+            <span class="text-3xl font-black text-amber-600 mb-1">10</span>
+            <span class="font-extrabold text-amber-950 text-base" data-i18n="session_opt_standard">Biasa</span>
+            <span class="text-xs text-slate-500 font-semibold" data-i18n="session_sub_standard">10 Soalan</span>
+          </button>
+
+          <button onclick="startGame(15)" class="p-4 rounded-2xl bg-purple-50 hover:bg-purple-100 active:scale-95 border-3 border-purple-300 shadow-candy flex flex-col items-center text-center transition-all">
+            <span class="text-3xl font-black text-purple-600 mb-1">15</span>
+            <span class="font-extrabold text-purple-950 text-base" data-i18n="session_opt_explorer">Penjelajah</span>
+            <span class="text-xs text-slate-500 font-semibold" data-i18n="session_sub_explorer">15 Soalan</span>
+          </button>
+        </div>
+
+        <button onclick="navTo('home')" class="text-sm font-bold text-slate-500 hover:text-slate-700 underline" data-i18n="btn_back_home">
+          Kembali ke Laman Utama
+        </button>
+      </section>
+
+      <!-- ==================== 4. SKRIN PERMAINAN (GAMEPLAY) ==================== -->
+      <section id="screen-gameplay" class="hidden w-full h-full max-w-5xl mx-auto flex flex-col justify-between py-1 sm:py-2">
+        
+        <!-- Bar Status Atas Permainan -->
+        <div class="w-full flex items-center justify-between gap-2 px-3 py-2 bg-white/95 backdrop-blur-md rounded-2xl border-2 border-slate-200 shadow-md">
+          <div class="flex items-center gap-2">
+            <span class="text-xs sm:text-sm font-extrabold text-slate-500" data-i18n="game_question">Soalan</span>
+            <span id="game-progress-text" class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 font-black text-xs sm:text-sm">1 / 5</span>
+          </div>
+
+          <div id="game-feedback-pill" class="flex-1 max-w-md mx-2 py-1 px-3 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 text-center font-bold text-xs sm:text-sm truncate">
+            <span id="game-prompt-text" data-i18n="game_instruction_prompt">Tarik atau pandu garisan ke laluan yang betul!</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs sm:text-sm font-extrabold text-slate-500" data-i18n="game_score">Markah:</span>
+            <span id="game-score-badge" class="px-3 py-0.5 rounded-full bg-emerald-500 text-white font-black text-xs sm:text-sm shadow-sm">0</span>
+          </div>
+        </div>
+
+        <!-- Pentas Sambungan Garisan Drag & Drive Launcher -->
+        <div id="connection-stage" class="relative flex-1 w-full my-2 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-6 p-2 rounded-3xl bg-white/60 backdrop-blur-md border-2 border-white/70 select-none overflow-hidden touch-none shadow-xl">
+          
+          <!-- Lapisan SVG Garisan Sambungan Sementara & Kekal -->
+          <svg id="connection-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow-line" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#10B981" flood-opacity="0.8"/>
+              </filter>
+              <filter id="glow-gold-line" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.7"/>
+              </filter>
+            </defs>
+            <path id="temp-line" d="" stroke="#F59E0B" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.95" class="animate-trail" filter="url(#glow-gold-line)"/>
+            <path id="permanent-line" d="" stroke="#10B981" stroke-width="11" stroke-linecap="round" fill="none" filter="url(#glow-line)" class="transition-all duration-300"/>
+          </svg>
+
+          <!-- Ruang Kenderaan Asal (Kiri / Atas) -->
+          <div class="w-full md:w-1/2 flex flex-col items-center justify-center p-2 z-20">
+            <div id="vehicle-card" 
+                 class="relative w-60 sm:w-68 md:w-76 bg-white/95 backdrop-blur-sm rounded-3xl p-4 border-4 border-amber-300 shadow-candy flex flex-col items-center cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02]"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Kenderaan untuk dipadankan">
+              
+              <div id="vehicle-visual-box" class="w-48 h-36 sm:w-56 sm:h-40 flex items-center justify-center overflow-hidden transition-all duration-300">
+                <!-- Imej kenderaan dimasukkan secara dinamik -->
+              </div>
+
+              <div class="mt-2 text-center w-full">
+                <span id="vehicle-title-text" class="text-base sm:text-xl font-extrabold text-sky-950 block"></span>
+                <span id="vehicle-desc-text" class="text-xs sm:text-sm font-semibold text-slate-500 block truncate"></span>
+              </div>
+
+              <!-- Bar Kawalan Interaktif Pantas (Butang Hon & Pandu) -->
+              <div class="mt-3 flex items-center justify-center gap-2 w-full">
+                <button id="btn-vehicle-horn" onclick="playVehicleHornSound(event)" class="px-3 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 active:scale-95 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1 shadow-sm transition-transform">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                  <span data-i18n="btn_horn_beep">Bunyi Hon!</span>
+                </button>
+                <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200" data-i18n="hint_drag_ready">Tarik ke portal!</span>
+              </div>
+
+              <!-- Titik Sauh Interaktif -->
+              <div id="drag-origin-anchor" class="absolute -right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-amber-400 border-2 border-white shadow-candy-sm animate-pulse-ring">
+                <div class="w-4 h-4 rounded-full bg-amber-600"></div>
+              </div>
+              <div id="drag-origin-anchor-mobile" class="absolute -bottom-3 left-1/2 -translate-x-1/2 flex md:hidden items-center justify-center w-9 h-9 rounded-full bg-amber-400 border-2 border-white shadow-candy-sm animate-pulse-ring">
+                <div class="w-4 h-4 rounded-full bg-amber-600"></div>
+              </div>
+            </div>
+
+            <!-- Petunjuk Mesra Aksesibiliti -->
+            <p class="mt-2 text-[11px] sm:text-xs font-semibold text-slate-700 bg-white/90 px-3 py-1 rounded-full border border-slate-200 shadow-sm" data-i18n="drag_tap_hint">
+              Petunjuk: Tarik garisan terus atau tekan kenderaan lalu tekan pintu destinasi!
+            </p>
+          </div>
+
+          <!-- Pilihan Laluan Perjalanan (Kanan / Bawah) -->
+          <div id="destination-slots" class="w-full md:w-1/2 grid grid-cols-2 gap-2.5 sm:gap-3.5 p-1 z-20">
+            <!-- 4 Kad portal destinasi dimasukkan secara dinamik -->
+          </div>
+        </div>
+
+        <!-- Panduan Bawah Bersama Maskot Si Panda -->
+        <div class="w-full flex items-center justify-between px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 text-xs text-slate-600">
+          <div class="flex items-center gap-2">
+            <img src="https://imglink.cc/cdn/Yw068zKv4x.png" alt="Si Panda" class="w-7 h-7 object-contain drop-shadow" onerror="this.src='https://placehold.co/40x40/FFB800/FFFFFF?text=Panda'">
+            <span id="mascot-status-msg" class="font-bold text-sky-950" data-i18n="mascot_guide_ready">Si Panda bersedia membantu anda!</span>
+          </div>
+
+          <button onclick="quitGameConfirm()" class="px-3 py-1 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold border border-rose-300" data-i18n="btn_exit_game">
+            Keluar Sesi
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== 5. SKRIN KEPUTUSAN (RESULTS) ==================== -->
+      <section id="screen-results" class="hidden w-full max-w-lg mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border-4 border-amber-300 shadow-2xl my-auto text-center">
+        <div class="w-28 h-28 mx-auto mb-2 animate-wiggle">
+          <img src="https://imglink.cc/cdn/Yw068zKv4x.png" alt="Si Panda Berjaya" class="w-full h-full object-contain drop-shadow-xl" onerror="this.src='https://placehold.co/120x120/FFB800/FFFFFF?text=Yay!'">
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-black text-sky-950 mb-1" data-i18n="results_title">Syabas! Tahniah!</h2>
+        <p class="text-slate-600 font-semibold text-sm mb-5" data-i18n="results_subtitle">Anda telah melengkapkan perjalanan kenderaan!</p>
+
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="p-3 bg-amber-50 rounded-2xl border-2 border-amber-200">
+            <span class="block text-xs font-bold text-amber-800" data-i18n="res_score_label">Jumlah Markah</span>
+            <span id="res-score-val" class="text-2xl sm:text-3xl font-black text-amber-600">0</span>
+          </div>
+          <div class="p-3 bg-sky-50 rounded-2xl border-2 border-sky-200">
+            <span class="block text-xs font-bold text-sky-800" data-i18n="res_accuracy_label">Ketepatan Jawapan</span>
+            <span id="res-accuracy-val" class="text-2xl sm:text-3xl font-black text-sky-600">100%</span>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <button onclick="navTo('session')" class="w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-black text-base sm:text-lg border-3 border-amber-500 shadow-candy" data-i18n="btn_play_again">
+            Main Sekali Lagi
+          </button>
+          <button onclick="navTo('collection')" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-sm sm:text-base border-2 border-emerald-600 shadow-candy-sm" data-i18n="btn_view_collection">
+            Lihat Koleksi Kenderaan
+          </button>
+          <button onclick="navTo('home')" class="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm" data-i18n="btn_back_home">
+            Kembali ke Laman Utama
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== 6. PROFIL PEMAIN ==================== -->
+      <section id="screen-profile" class="hidden w-full max-w-xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-7 border-4 border-purple-300 shadow-2xl my-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl sm:text-2xl font-black text-purple-950" data-i18n="profile_title">Profil Pemain</h2>
+          <button onclick="navTo('home')" class="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200" aria-label="Tutup">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-2xl border border-purple-200">
+            <div class="w-14 h-14 rounded-2xl bg-purple-200 flex items-center justify-center text-purple-700">
+              <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-purple-900" data-i18n="profile_name_label">Nama Pemain</label>
+              <input type="text" id="input-player-name" placeholder="Pemain Cilik" class="w-full mt-1 px-3 py-1.5 rounded-xl border border-purple-300 font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+            </div>
+            <button onclick="savePlayerName()" class="px-3 py-2 rounded-xl bg-purple-500 text-white font-bold text-xs" data-i18n="btn_save">Simpan</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="block text-[11px] font-bold text-slate-500" data-i18n="stat_games_played">Sesi Main</span>
+              <span id="stat-games-played" class="text-lg font-black text-slate-800">0</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="block text-[11px] font-bold text-slate-500" data-i18n="stat_questions_ans">Soalan Dijawab</span>
+              <span id="stat-questions-answered" class="text-lg font-black text-slate-800">0</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="block text-[11px] font-bold text-slate-500" data-i18n="stat_correct_ans">Jawapan Betul</span>
+              <span id="stat-correct-answers" class="text-lg font-black text-slate-800">0</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="block text-[11px] font-bold text-slate-500" data-i18n="stat_best_score">Markah Terbaik</span>
+              <span id="stat-best-score" class="text-lg font-black text-emerald-600">0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 7. PROFIL MURID (KOSONG SECARA LALAI) ==================== -->
+      <section id="screen-student_profile" class="hidden w-full max-w-md mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-7 border-4 border-amber-300 shadow-2xl my-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-black text-amber-950" data-i18n="student_title">Profil Murid</h2>
+          <button onclick="navTo('home')" class="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-500 mb-4 font-semibold" data-i18n="student_desc">Maklumat pendaftaran murid untuk rekod bimbingan guru dan ibu bapa.</p>
+
+        <form onsubmit="saveStudentProfile(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700" data-i18n="student_name_label">Nama Penuh Murid</label>
+            <input type="text" id="input-student-fullname" value="" placeholder="" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700" data-i18n="student_class_label">Kelas / Kumpulan</label>
+            <input type="text" id="input-student-class" value="" placeholder="" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700" data-i18n="student_school_label">Tadika / Prasekolah</label>
+            <input type="text" id="input-student-school" value="" placeholder="" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+          </div>
+          <button type="submit" class="w-full mt-2 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-sm border-2 border-amber-500 shadow-candy-sm" data-i18n="btn_save">
+            Simpan Maklumat
+          </button>
+        </form>
+      </section>
+
+      <!-- ==================== 8. KOD KELUARGA (KOSONG SECARA LALAI) ==================== -->
+      <section id="screen-family_code" class="hidden w-full max-w-md mx-auto bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-7 border-4 border-purple-300 shadow-2xl my-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-black text-purple-950" data-i18n="family_title">Kod Keluarga</h2>
+          <button onclick="navTo('home')" class="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-500 mb-4 font-semibold" data-i18n="family_desc">Masukkan kod khas keluarga yang dibekalkan oleh pihak prasekolah atau ibu bapa untuk menyelaraskan rekod pembelajaran.</p>
+
+        <form onsubmit="saveFamilyCode(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700" data-i18n="family_code_label">Kod Keluarga Anda</label>
+            <input type="text" id="input-family-code" value="" placeholder="" class="w-full mt-1 px-3 py-2 rounded-xl border border-purple-300 font-mono font-bold text-sm uppercase tracking-widest text-center">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-black text-sm border-2 border-purple-600 shadow-candy-sm" data-i18n="btn_save">
+            Simpan Kod
+          </button>
+        </form>
+      </section>
+
+      <!-- ==================== 9. KOLEKSI (36 KENDERAAN LENGKAP TANPA KATA COMEL) ==================== -->
+      <section id="screen-collection" class="hidden w-full max-w-6xl mx-auto h-full flex flex-col p-2 sm:p-4">
+        <div class="flex items-center justify-between px-3 py-2 bg-white/95 rounded-2xl border-2 border-emerald-300 shadow-md mb-3">
+          <div>
+            <h2 class="text-lg sm:text-2xl font-black text-emerald-950" data-i18n="collection_title">Koleksi Watak Kenderaan</h2>
+            <p class="text-xs text-slate-500 font-semibold" data-i18n="collection_subtitle">Semua 36 watak kenderaan dan laluan utamanya</p>
+          </div>
+          <button onclick="navTo('home')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm border border-slate-300" data-i18n="btn_back">
+            Kembali
+          </button>
+        </div>
+
+        <div id="collection-grid" class="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pb-8 pr-1">
+          <!-- Injected via buildCollectionGrid() -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Rasmi Tanpa Sebarang Perubahan -->
+    <footer class="relative z-20 py-2 text-center text-xs font-semibold text-slate-400 bg-slate-900/90 border-t border-slate-800">
+      Kinder Klub | All Rights Reserved
+    </footer>
+
+    <!-- Pemberitahuan Mesej Mesra Tanpa Menggunakan alert() -->
+    <div id="app-toast" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs sm:text-sm border border-slate-700 shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 text-center">
+    </div>
+  </div>
+
+  <script>
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      },
+      playSuccess() {
+        this.playTone(523.25, 'triangle', 0.12, 0.25);
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.14, 0.25), 110);
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.22, 0.3), 220);
+        setTimeout(() => this.playTone(1046.50, 'triangle', 0.35, 0.32), 330);
+      },
+      playWrong() {
+        this.playTone(260, 'sine', 0.18, 0.2);
+        setTimeout(() => this.playTone(210, 'sine', 0.25, 0.18), 140);
+      },
+      playClick() {
+        this.playTone(440, 'triangle', 0.05, 0.15);
+      },
+      playSnap() {
+        this.playTone(330, 'sine', 0.08, 0.15);
+      },
+      playCarHorn() {
+        // Bunyi hon dwi-nada kereta sebenar (420Hz & 525Hz) - dua kali hon berirama "Hon-hon!"
+        try {
+          this.init();
+          const playBlast = (startTime, duration) => {
+            const freqs = [420, 525]; // Akord hon automotif major-third
+            freqs.forEach(freq => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              const filter = this.ctx.createBiquadFilter();
+
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(freq, startTime);
+
+              // Penapis resonans akustik kebuk hon kenderaan
+              filter.type = 'lowpass';
+              filter.frequency.setValueAtTime(2100, startTime);
+              filter.Q.setValueAtTime(2.5, startTime);
+
+              gain.gain.setValueAtTime(0.0001, startTime);
+              gain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
+              gain.gain.setValueAtTime(0.28, startTime + duration - 0.03);
+              gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+              osc.connect(filter);
+              filter.connect(gain);
+              gain.connect(this.ctx.destination);
+
+              osc.start(startTime);
+              osc.stop(startTime + duration);
+            });
+          };
+
+          const now = this.ctx.currentTime;
+          playBlast(now, 0.15);        // Hon pertama
+          playBlast(now + 0.21, 0.26); // Hon kedua
+        } catch(e) {}
+      },
+      playBicycleBell() {
+        // Bunyi loceng basikal "Kring-kring!"
+        try {
+          this.init();
+          const ring = (time) => {
+            const freqs = [2093, 2793, 3135];
+            freqs.forEach(f => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(f, time);
+              gain.gain.setValueAtTime(0.2, time);
+              gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.18);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(time);
+              osc.stop(time + 0.18);
+            });
+          };
+          const now = this.ctx.currentTime;
+          ring(now);
+          ring(now + 0.12);
+        } catch(e) {}
+      },
+      playTrainHorn() {
+        // Hon / Wisel lokomotif kereta api "Tuuut-tuuut!"
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+          const freqs = [311.13, 370.0, 466.16]; // Akord lokomotif 3-chime
+          freqs.forEach(f => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, now);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1400, now);
+
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(0.22, now + 0.05);
+            gain.gain.setValueAtTime(0.22, now + 0.45);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.55);
+          });
+        } catch(e) {}
+      },
+      playShipHorn() {
+        // Hon kabus kapal laut yang dalam & bergema
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+          const freqs = [110, 138];
+          freqs.forEach(f => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, now);
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(450, now);
+
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(0.35, now + 0.08);
+            gain.gain.setValueAtTime(0.35, now + 0.6);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.75);
+          });
+        } catch(e) {}
+      },
+      playSiren() {
+        // Siren kecemasan polis, bomba & ambulans
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(659.25, now);
+          osc.frequency.setValueAtTime(523.25, now + 0.2);
+          osc.frequency.setValueAtTime(659.25, now + 0.4);
+          osc.frequency.setValueAtTime(523.25, now + 0.6);
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.8);
+        } catch(e) {}
+      },
+      playVehicleHorn(vehicleId) {
+        if (vehicleId === 'bicycle') {
+          this.playBicycleBell();
+        } else if (vehicleId === 'train') {
+          this.playTrainHorn();
+        } else if (['boat', 'ferry', 'cruise_ship', 'cargo_ship', 'yacht', 'submarine'].includes(vehicleId)) {
+          this.playShipHorn();
+        } else if (['police_car', 'ambulance', 'fire_engine'].includes(vehicleId)) {
+          this.playSiren();
+        } else {
+          this.playCarHorn();
+        }
+      },
+      playHorn() {
+        this.playCarHorn();
+      },
+      playEngineRev() {
+        // Deruman enjin semasa meluncur laju
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(420, this.ctx.currentTime + 0.5);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.6);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.6);
+        } catch(e) {}
+      }
+    };
+
+    const I18N = {
+      ms: {
+        app_title: "Di Mana Bergerak?",
+        nav_home: "Laman Utama",
+        nav_profile: "Profil",
+        nav_collection: "Koleksi",
+        mascot_name: "Si Panda Pengembara",
+        home_title: "Di Mana Kenderaan Bergerak?",
+        home_desc: "Bantu Si Panda Pengembara memadankan 36 kenderaan ke laluan perjalanannya yang betul!",
+        btn_play: "Mula Main",
+        btn_instructions: "Panduan",
+        btn_view_collection: "Galeri 36 Kenderaan",
+        btn_family_code: "Kod Keluarga",
+        btn_student_profile: "Profil Murid",
+        instr_title: "Panduan Bermain",
+        instr_subtitle: "Mudah, Seronok & Interaktif!",
+        instr_step1: "Pegang dan pandu kenderaan dengan menarik garisan terus ke arah portal laluan yang betul.",
+        instr_step2: "Anda juga boleh menekan kenderaan lalu menekan pintu laluan destinasi untuk melancarkannya.",
+        instr_step3: "Setiap sambungan yang betul diberi +10 mata! Kenderaan akan meluncur terus ke destinasinya.",
+        btn_understood: "Saya Faham, Jom Main!",
+        session_title: "Pilih Bilangan Soalan",
+        session_subtitle: "Pilih panjang sesi aktiviti yang anda gemari",
+        session_opt_quick: "Pantas",
+        session_sub_quick: "5 Soalan",
+        session_opt_standard: "Biasa",
+        session_sub_standard: "10 Soalan",
+        session_opt_explorer: "Penjelajah",
+        session_sub_explorer: "15 Soalan",
+        badge_popular: "Pilihan Ramai",
+        btn_back_home: "Kembali ke Laman Utama",
+        game_question: "Soalan",
+        game_score: "Markah",
+        game_instruction_prompt: "Tarik atau pandu garisan ke laluan yang betul!",
+        btn_horn_beep: "Bunyi Hon! 📢",
+        hint_drag_ready: "Tarik ke portal!",
+        drag_tap_hint: "Petunjuk: Tarik garisan terus atau tekan kenderaan lalu tekan pintu destinasi!",
+        mascot_guide_ready: "Si Panda bersedia membantu anda!",
+        btn_exit_game: "Keluar Sesi",
+        results_title: "Syabas! Tahniah!",
+        results_subtitle: "Anda telah melengkapkan perjalanan kenderaan!",
+        res_score_label: "Jumlah Markah",
+        res_accuracy_label: "Ketepatan Jawapan",
+        btn_play_again: "Main Sekali Lagi",
+        profile_title: "Profil Pemain",
+        profile_name_label: "Nama Pemain",
+        btn_save: "Simpan",
+        stat_games_played: "Sesi Main",
+        stat_questions_ans: "Soalan Dijawab",
+        stat_correct_ans: "Jawapan Betul",
+        stat_best_score: "Markah Terbaik",
+        student_title: "Profil Murid",
+        student_desc: "Maklumat pendaftaran murid untuk rekod bimbingan guru dan ibu bapa.",
+        student_name_label: "Nama Penuh Murid",
+        student_class_label: "Kelas / Kumpulan",
+        student_school_label: "Tadika / Prasekolah",
+        family_title: "Kod Keluarga",
+        family_desc: "Masukkan kod khas keluarga yang dibekalkan oleh pihak prasekolah atau ibu bapa untuk menyelaraskan rekod pembelajaran.",
+        family_code_label: "Kod Keluarga Anda",
+        collection_title: "Koleksi Watak Kenderaan",
+        collection_subtitle: "Semua 36 watak kenderaan dan laluan utamanya",
+        btn_back: "Kembali",
+        confirm_quit: "Adakah anda pasti mahu menamatkan sesi permainan ini?",
+        feedback_correct: "Tepat sekali! Kenderaan meluncur ke laluannya!",
+        feedback_wrong: "Cuba lagi ya! Tarik ke pintu laluan yang sesuai.",
+        saved_success: "Maklumat telah berjaya disimpan!",
+        primary_dest_label: "Laluan Utama",
+        travel_path_label: "Laluan Perjalanan",
+        tap_destination_now: "Sekarang tekan pintu laluan destinasi!",
+        env_road: "Jalan Raya",
+        env_railway: "Landasan Kereta Api",
+        env_water: "Permukaan Air",
+        env_sky: "Udara",
+        env_bicycle_path: "Laluan Basikal",
+        env_construction: "Tapak Pembinaan",
+        env_farm_track: "Laluan Ladang"
+      },
+      en: {
+        app_title: "Where Does It Go?",
+        nav_home: "Home",
+        nav_profile: "Profile",
+        nav_collection: "Collection",
+        mascot_name: "Explorer Baby Panda",
+        home_title: "Where Does It Go?",
+        home_desc: "Help Explorer Baby Panda match all 36 vehicles to their correct travel paths!",
+        btn_play: "Play Now",
+        btn_instructions: "Instructions",
+        btn_view_collection: "36 Vehicles Gallery",
+        btn_family_code: "Family Code",
+        btn_student_profile: "Student Profile",
+        instr_title: "How to Play",
+        instr_subtitle: "Simple, Fun & Interactive!",
+        instr_step1: "Hold and steer the vehicle by dragging a line directly towards its correct destination gate.",
+        instr_step2: "You can also tap the vehicle and then tap the destination path to launch it.",
+        instr_step3: "Each correct connection earns +10 points! The vehicle will zoom right into its route.",
+        btn_understood: "Got It, Let's Play!",
+        session_title: "Choose Session Length",
+        session_subtitle: "Select your preferred learning activity length",
+        session_opt_quick: "Quick",
+        session_sub_quick: "5 Questions",
+        session_opt_standard: "Standard",
+        session_sub_standard: "10 Questions",
+        session_opt_explorer: "Explorer",
+        session_sub_explorer: "15 Questions",
+        badge_popular: "Popular",
+        btn_back_home: "Back to Home",
+        game_question: "Question",
+        game_score: "Score",
+        game_instruction_prompt: "Drag or steer a line to the correct path!",
+        btn_horn_beep: "Beep Horn! 📢",
+        hint_drag_ready: "Drag to portal!",
+        drag_tap_hint: "Tip: Drag a line directly or tap the vehicle and tap the destination gate!",
+        mascot_guide_ready: "Baby Panda is ready to guide you!",
+        btn_exit_game: "Exit Session",
+        results_title: "Hooray! Well Done!",
+        results_subtitle: "You completed the transportation journey!",
+        res_score_label: "Total Score",
+        res_accuracy_label: "Answer Accuracy",
+        btn_play_again: "Play Again",
+        profile_title: "Player Profile",
+        profile_name_label: "Player Name",
+        btn_save: "Save",
+        stat_games_played: "Sessions Played",
+        stat_questions_ans: "Questions Answered",
+        stat_correct_ans: "Correct Answers",
+        stat_best_score: "Best Score",
+        student_title: "Student Profile",
+        student_desc: "Student registration details for teacher and parent guidance records.",
+        student_name_label: "Student Full Name",
+        student_class_label: "Class / Group",
+        student_school_label: "Preschool / Kindergarten",
+        family_title: "Family Code",
+        family_desc: "Enter your family code provided by your preschool or parents to sync progress.",
+        family_code_label: "Your Family Code",
+        collection_title: "Vehicle Character Collection",
+        collection_subtitle: "All 36 vehicle characters and their primary travel paths",
+        btn_back: "Back",
+        confirm_quit: "Are you sure you want to exit this game session?",
+        feedback_correct: "Spot on! The vehicle zooms into its route!",
+        feedback_wrong: "Try again! Steer towards the matching path.",
+        saved_success: "Information saved successfully!",
+        primary_dest_label: "Primary Path",
+        travel_path_label: "Travel Path",
+        tap_destination_now: "Now tap the destination path!",
+        env_road: "Road",
+        env_railway: "Railway Tracks",
+        env_water: "Water Surface",
+        env_sky: "Sky",
+        env_bicycle_path: "Bicycle Path",
+        env_construction: "Construction Ground",
+        env_farm_track: "Farm Track"
+      }
+    };
+
+    const ENVIRONMENTS = {
+      road: {
+        id: 'road',
+        img: 'https://imglink.cc/cdn/ohtugFX2BU.png',
+        borderColor: 'border-slate-500'
+      },
+      railway: {
+        id: 'railway',
+        img: 'https://imglink.cc/cdn/w60cZIgsHi.png',
+        borderColor: 'border-amber-600'
+      },
+      water: {
+        id: 'water',
+        img: 'https://imglink.cc/cdn/GsiCt5XuCz.png',
+        borderColor: 'border-sky-500'
+      },
+      sky: {
+        id: 'sky',
+        img: 'https://imglink.cc/cdn/Y0Ldiw_z6G.png',
+        borderColor: 'border-sky-300'
+      },
+      bicycle_path: {
+        id: 'bicycle_path',
+        img: 'https://imglink.cc/cdn/mVOR-kPr9e.png',
+        borderColor: 'border-emerald-500'
+      },
+      construction: {
+        id: 'construction',
+        img: 'https://imglink.cc/cdn/eDcmljKt6W.png',
+        borderColor: 'border-orange-500'
+      },
+      farm_track: {
+        id: 'farm_track',
+        img: 'https://imglink.cc/cdn/WwFL2DCqsM.png',
+        borderColor: 'border-lime-500'
+      }
+    };
+
+    const VEHICLES_DATABASE = [
+      // 1-19
+      {
+        id: 'car',
+        env: 'road',
+        name_ms: 'Kereta',
+        name_en: 'Car',
+        desc_ms: 'Bergerak lancar di atas jalan raya bandar',
+        desc_en: 'Cruises smoothly on city roads',
+        img: 'https://imglink.cc/cdn/GCI1rdVybL.png'
+      },
+      {
+        id: 'bus',
+        env: 'road',
+        name_ms: 'Bas',
+        name_en: 'Bus',
+        desc_ms: 'Membawa penumpang melintasi jalan raya',
+        desc_en: 'Transports commuters along roads',
+        img: 'https://imglink.cc/cdn/xxf8svP6Qq.png'
+      },
+      {
+        id: 'fire_engine',
+        env: 'road',
+        name_ms: 'Trak Bomba',
+        name_en: 'Fire Engine',
+        desc_ms: 'Bergegas memadam api di laluan jalan raya',
+        desc_en: 'Rushes to save the day on city roads',
+        img: 'https://imglink.cc/cdn/EhXgwRWdj_.png'
+      },
+      {
+        id: 'ambulance',
+        env: 'road',
+        name_ms: 'Ambulans',
+        name_en: 'Ambulance',
+        desc_ms: 'Membawa pesakit segera di jalan raya',
+        desc_en: 'Transports patients safely on the road',
+        img: 'https://imglink.cc/cdn/ol1ygJuOEy.png'
+      },
+      {
+        id: 'police_car',
+        env: 'road',
+        name_ms: 'Kereta Polis',
+        name_en: 'Police Car',
+        desc_ms: 'Meronda menjaga keselamatan jalan raya',
+        desc_en: 'Patrols safely along roadways',
+        img: 'https://imglink.cc/cdn/xQFJwxFvqy.png'
+      },
+      {
+        id: 'delivery_truck',
+        env: 'road',
+        name_ms: 'Lori Penghantaran',
+        name_en: 'Delivery Truck',
+        desc_ms: 'Menghantar bungkusan melalui jalan raya',
+        desc_en: 'Delivers packages along the street',
+        img: 'https://imglink.cc/cdn/bVO6J4cwSO.png'
+      },
+      {
+        id: 'train',
+        env: 'railway',
+        name_ms: 'Kereta Api',
+        name_en: 'Train',
+        desc_ms: 'Meluncur laju di atas landasan kereta api',
+        desc_en: 'Chugs steadily along railway tracks',
+        img: 'https://imglink.cc/cdn/UjxLzCBPxE.png'
+      },
+      {
+        id: 'airplane',
+        env: 'sky',
+        name_ms: 'Kapal Terbang',
+        name_en: 'Airplane',
+        desc_ms: 'Terbang tinggi merentas awan di udara',
+        desc_en: 'Soars high through clouds in the sky',
+        img: 'https://imglink.cc/cdn/yjc6-Fk31h.png'
+      },
+      {
+        id: 'helicopter',
+        env: 'sky',
+        name_ms: 'Helikopter',
+        name_en: 'Helicopter',
+        desc_ms: 'Bilah kipas berputar terbang di udara',
+        desc_en: 'Rotates blades to hover in the sky',
+        img: 'https://imglink.cc/cdn/iUHhXzsvIs.png'
+      },
+      {
+        id: 'boat',
+        env: 'water',
+        name_ms: 'Bot',
+        name_en: 'Boat',
+        desc_ms: 'Meredah ombak di permukaan air',
+        desc_en: 'Glides across water waves',
+        img: 'https://imglink.cc/cdn/alXkPfhpRY.png'
+      },
+      {
+        id: 'motorcycle',
+        env: 'road',
+        name_ms: 'Motosikal',
+        name_en: 'Motorcycle',
+        desc_ms: 'Menunggang tangkas di jalan raya',
+        desc_en: 'Rides swiftly across the road',
+        img: 'https://imglink.cc/cdn/b9B-HFLAA2.png'
+      },
+      {
+        id: 'bicycle',
+        env: 'bicycle_path',
+        name_ms: 'Basikal',
+        name_en: 'Bicycle',
+        desc_ms: 'Mengayuh santai di laluan basikal',
+        desc_en: 'Pedals smoothly along bicycle paths',
+        img: 'https://imglink.cc/cdn/uPgnU2qTFu.png'
+      },
+      {
+        id: 'tractor',
+        env: 'farm_track',
+        name_ms: 'Traktor',
+        name_en: 'Tractor',
+        desc_ms: 'Membajak tanah di laluan ladang',
+        desc_en: 'Ploughs ground along farm tracks',
+        img: 'https://imglink.cc/cdn/3kK8yK7aV4.png'
+      },
+      {
+        id: 'excavator',
+        env: 'construction',
+        name_ms: 'Jengkaut',
+        name_en: 'Excavator',
+        desc_ms: 'Menggali tanah di tapak pembinaan',
+        desc_en: 'Digs earth on construction ground',
+        img: 'https://imglink.cc/cdn/5b4y149hvs.png'
+      },
+      {
+        id: 'school_van',
+        env: 'road',
+        name_ms: 'Van Sekolah',
+        name_en: 'School Van',
+        desc_ms: 'Membawa murid di jalan raya',
+        desc_en: 'Transports students on the road',
+        img: 'https://imglink.cc/cdn/LMiT--D2A3.png'
+      },
+      {
+        id: 'hot_air_balloon',
+        env: 'sky',
+        name_ms: 'Belon Udara Panas',
+        name_en: 'Hot-Air Balloon',
+        desc_ms: 'Terapung ditiup angin di udara',
+        desc_en: 'Floats gently high in the sky',
+        img: 'https://imglink.cc/cdn/fbhwcZVdcZ.png'
+      },
+      {
+        id: 'taxi',
+        env: 'road',
+        name_ms: 'Teksi',
+        name_en: 'Taxi',
+        desc_ms: 'Membawa penumpang di jalan raya',
+        desc_en: 'Drives city riders along roadways',
+        img: 'https://imglink.cc/cdn/Brgnu8E96Y.png'
+      },
+      {
+        id: 'dump_truck',
+        env: 'construction',
+        name_ms: 'Lori Jongkit',
+        name_en: 'Dump Truck',
+        desc_ms: 'Menumpahkan muatan di tapak pembinaan',
+        desc_en: 'Unloads sand on construction sites',
+        img: 'https://imglink.cc/cdn/HfwfjAl3UK.png'
+      },
+      {
+        id: 'bulldozer',
+        env: 'construction',
+        name_ms: 'Buldoser',
+        name_en: 'Bulldozer',
+        desc_ms: 'Menolak tanah di tapak pembinaan',
+        desc_en: 'Pushes earth on construction ground',
+        img: 'https://imglink.cc/cdn/MSXEIpnR-5.png'
+      },
+
+      // 20-36
+      {
+        id: 'ferry',
+        env: 'water',
+        name_ms: 'Feri Penumpang',
+        name_en: 'Ferry',
+        desc_ms: 'Menyeberangi lautan di atas permukaan air',
+        desc_en: 'Transports travelers across water',
+        img: 'https://imglink.cc/cdn/sF5_hJ4MTr.png'
+      },
+      {
+        id: 'submarine',
+        env: 'water',
+        name_ms: 'Kapal Selam',
+        name_en: 'Submarine',
+        desc_ms: 'Menyelam meneroka di dalam air',
+        desc_en: 'Dives deep into underwater depths',
+        img: 'https://imglink.cc/cdn/EU30_j2rjf.png'
+      },
+      {
+        id: 'rocket',
+        env: 'sky',
+        name_ms: 'Roket Angkasa',
+        name_en: 'Rocket',
+        desc_ms: 'Meluru laju merentas langit dan udara',
+        desc_en: 'Blasts through the sky toward space',
+        img: 'https://imglink.cc/cdn/ktbrNFOBUp.png'
+      },
+      {
+        id: 'yacht',
+        env: 'water',
+        name_ms: 'Yat Mewah',
+        name_en: 'Yacht',
+        desc_ms: 'Belayar tenang di permukaan air',
+        desc_en: 'Glides across water surfaces',
+        img: 'https://imglink.cc/cdn/bjxCl0NWSD.png'
+      },
+      {
+        id: 'spaceship',
+        env: 'sky',
+        name_ms: 'Kapal Angkasa',
+        name_en: 'Spaceship',
+        desc_ms: 'Melayang meneroka lapisan udara tinggi',
+        desc_en: 'Travels through the upper sky atmosphere',
+        img: 'https://imglink.cc/cdn/CcIUAMrXdI.png'
+      },
+      {
+        id: 'cruise_ship',
+        env: 'water',
+        name_ms: 'Kapal Persiaran',
+        name_en: 'Cruise Ship',
+        desc_ms: 'Meredah pelayaran di atas air',
+        desc_en: 'Sails across open water surfaces',
+        img: 'https://imglink.cc/cdn/dot-7x7x_y.png'
+      },
+      {
+        id: 'cargo_ship',
+        env: 'water',
+        name_ms: 'Kapal Kargo',
+        name_en: 'Cargo Ship',
+        desc_ms: 'Membawa kontena besar merentas air',
+        desc_en: 'Carries cargo across water',
+        img: 'https://imglink.cc/cdn/elRQqEdPdO.png'
+      },
+      {
+        id: 'kayak',
+        env: 'water',
+        name_ms: 'Kayak',
+        name_en: 'Kayak',
+        desc_ms: 'Didayung tangkas menyusuri permukaan air',
+        desc_en: 'Paddles swiftly across fresh water',
+        img: 'https://imglink.cc/cdn/wSAYMDIoSM.png'
+      },
+      {
+        id: 'jet_ski',
+        env: 'water',
+        name_ms: 'Jet Ski',
+        name_en: 'Jet Ski',
+        desc_ms: 'Melompat laju di atas ombak air',
+        desc_en: 'Skims rapidly over water waves',
+        img: 'https://imglink.cc/cdn/DOEJHE5xrT.png'
+      },
+      {
+        id: 'garbage_truck',
+        env: 'road',
+        name_ms: 'Lori Sampah',
+        name_en: 'Garbage Truck',
+        desc_ms: 'Membersihkan kawasan di sepanjang jalan raya',
+        desc_en: 'Collects bins along the road',
+        img: 'https://imglink.cc/cdn/WgixmfY8iA.png'
+      },
+      {
+        id: 'tanker_truck',
+        env: 'road',
+        name_ms: 'Lori Tangki',
+        name_en: 'Tanker Truck',
+        desc_ms: 'Membawa cecair selamat di laluan jalan raya',
+        desc_en: 'Transports liquids safely across roads',
+        img: 'https://imglink.cc/cdn/Eh5PWkmQnd.png'
+      },
+      {
+        id: 'road_roller',
+        env: 'construction',
+        name_ms: 'Penggelek Jalan',
+        name_en: 'Road Roller',
+        desc_ms: 'Meratakan tar di tapak pembinaan',
+        desc_en: 'Flattens asphalt on construction ground',
+        img: 'https://imglink.cc/cdn/9QHbZRyFnJ.png'
+      },
+      {
+        id: 'mobile_crane',
+        env: 'construction',
+        name_ms: 'Kren Bergerak',
+        name_en: 'Mobile Crane',
+        desc_ms: 'Mengangkat beban berat di tapak pembinaan',
+        desc_en: 'Lifts heavy materials on construction ground',
+        img: 'https://imglink.cc/cdn/aC2nqh5Id5.png'
+      },
+      {
+        id: 'forklift',
+        env: 'construction',
+        name_ms: 'Forklif',
+        name_en: 'Forklift',
+        desc_ms: 'Menyusun palet barang di tapak pembinaan',
+        desc_en: 'Stacks pallets on construction ground',
+        img: 'https://imglink.cc/cdn/9QHbZRyFnJ.png'
+      },
+      {
+        id: 'golf_cart',
+        env: 'bicycle_path',
+        name_ms: 'Kereta Golf',
+        name_en: 'Golf Cart',
+        desc_ms: 'Bergerak lancar di laluan santai dan basikal',
+        desc_en: 'Glides smoothly along special paths',
+        img: 'https://imglink.cc/cdn/YYfDWLv1Qm.png'
+      },
+      {
+        id: 'atv_vehicle',
+        env: 'farm_track',
+        name_ms: 'Kenderaan ATV',
+        name_en: 'ATV Vehicle',
+        desc_ms: 'Meredah denai berlumpur di laluan ladang',
+        desc_en: 'Tackles dirt trails on farm tracks',
+        img: 'https://imglink.cc/cdn/87T6StK1LC.png'
+      },
+      {
+        id: 'jet_plane',
+        env: 'sky',
+        name_ms: 'Pesawat Jet Laju',
+        name_en: 'Fast Jet',
+        desc_ms: 'Meluncur sepantas kilat merentas udara',
+        desc_en: 'Zooms at top speed through the sky',
+        img: 'https://imglink.cc/cdn/5VnGiT-HGM.png'
+      }
+    ];
+
+    const AppState = {
+      lang: 'ms', // Bahasa Melayu secara lalai
+      screen: 'home',
+      sessionLength: 5,
+      currentQuestionIndex: 0,
+      activeQuestions: [],
+      score: 0,
+      totalAnswerAttempts: 0,
+      correctAnswersInSession: 0,
+      selectedVehicleForTap: false,
+      isDragging: false,
+      dragStartPos: { x: 0, y: 0 },
+      isTransitioning: false,
+
+      storageKeys: {
+        stats: 'kinderklub_g3_stats',
+        player: 'kinderklub_g3_player',
+        student: 'kinderklub_g3_student',
+        family: 'kinderklub_g3_family',
+        lang: 'kinderklub_g3_lang'
+      },
+
+      init() {
+        const savedLang = localStorage.getItem(this.storageKeys.lang);
+        if (savedLang === 'en' || savedLang === 'ms') {
+          this.lang = savedLang;
+        } else {
+          this.lang = 'ms'; // Kekalkan BM secara lalai
+        }
+
+        // Profil Murid & Kod Keluarga kekal kosong secara lalai
+        const student = localStorage.getItem(this.storageKeys.student);
+        if (student) {
+          try {
+            const parsed = JSON.parse(student);
+            document.getElementById('input-student-fullname').value = parsed.name || '';
+            document.getElementById('input-student-class').value = parsed.class || '';
+            document.getElementById('input-student-school').value = parsed.school || '';
+          } catch(e) {}
+        }
+
+        const family = localStorage.getItem(this.storageKeys.family);
+        if (family) {
+          document.getElementById('input-family-code').value = family;
+        }
+
+        const player = localStorage.getItem(this.storageKeys.player);
+        if (player) {
+          document.getElementById('input-player-name').value = player;
+        }
+
+        this.updateProfileStatsUI();
+        this.applyLanguage();
+      },
+
+      getStats() {
+        try {
+          const raw = localStorage.getItem(this.storageKeys.stats);
+          if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return {
+          gamesPlayed: 0,
+          questionsAnswered: 0,
+          correctAnswers: 0,
+          bestScore: 0
+        };
+      },
+
+      saveStats(newScore, answeredCount, correctCount) {
+        const stats = this.getStats();
+        stats.gamesPlayed += 1;
+        stats.questionsAnswered += answeredCount;
+        stats.correctAnswers += correctCount;
+        if (newScore > stats.bestScore) {
+          stats.bestScore = newScore;
+        }
+        localStorage.setItem(this.storageKeys.stats, JSON.stringify(stats));
+        this.updateProfileStatsUI();
+      },
+
+      updateProfileStatsUI() {
+        const stats = this.getStats();
+        document.getElementById('stat-games-played').innerText = stats.gamesPlayed;
+        document.getElementById('stat-questions-answered').innerText = stats.questionsAnswered;
+        document.getElementById('stat-correct-answers').innerText = stats.correctAnswers;
+        document.getElementById('stat-best-score').innerText = stats.bestScore;
+      },
+
+      applyLanguage() {
+        const dict = I18N[this.lang];
+        document.documentElement.lang = this.lang === 'ms' ? 'ms-MY' : 'en';
+        const indicator = document.getElementById('lang-indicator');
+        if (indicator) {
+          indicator.innerText = this.lang === 'ms' ? 'BM' : 'EN';
+        }
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (dict[key]) {
+            el.innerText = dict[key];
+          }
+        });
+
+        if (this.screen === 'gameplay' && this.activeQuestions.length > 0) {
+          renderCurrentQuestionStrings();
+        }
+      }
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('app-toast');
+      toast.innerText = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2400);
+    }
+
+    function toggleLanguage() {
+      AudioEngine.playClick();
+      AppState.lang = AppState.lang === 'ms' ? 'en' : 'ms';
+      localStorage.setItem(AppState.storageKeys.lang, AppState.lang);
+      AppState.applyLanguage();
+      if (AppState.screen === 'collection') {
+        buildCollectionGrid();
+      }
+    }
+
+    function navTo(screenId) {
+      AudioEngine.playClick();
+      AppState.screen = screenId;
+
+      const screens = [
+        'home', 'instructions', 'session', 'gameplay',
+        'results', 'profile', 'student_profile', 'family_code', 'collection'
+      ];
+
+      screens.forEach(s => {
+        const el = document.getElementById(`screen-${s}`);
+        if (el) {
+          if (s === screenId) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        }
+      });
+
+      if (screenId === 'collection') {
+        buildCollectionGrid();
+      }
+    }
+
+    function quitGameConfirm() {
+      AudioEngine.playClick();
+      const msg = I18N[AppState.lang].confirm_quit;
+      showToast(msg);
+      setTimeout(() => {
+        navTo('home');
+      }, 1000);
+    }
+
+    function playVehicleHornSound(e) {
+      if (e) e.stopPropagation();
+      const currentVehicle = AppState.activeQuestions[AppState.currentQuestionIndex];
+      const vehicleId = currentVehicle ? currentVehicle.id : 'car';
+      AudioEngine.playVehicleHorn(vehicleId);
+      const vCard = document.getElementById('vehicle-card');
+      vCard.classList.add('animate-wiggle');
+      setTimeout(() => {
+        vCard.classList.remove('animate-wiggle');
+      }, 700);
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startGame(sessionLen) {
+      AudioEngine.playClick();
+      AppState.sessionLength = sessionLen;
+      AppState.currentQuestionIndex = 0;
+      AppState.score = 0;
+      AppState.totalAnswerAttempts = 0;
+      AppState.correctAnswersInSession = 0;
+      AppState.selectedVehicleForTap = false;
+      AppState.isTransitioning = false;
+
+      const shuffledVehicles = shuffleArray(VEHICLES_DATABASE);
+      AppState.activeQuestions = shuffledVehicles.slice(0, sessionLen);
+
+      navTo('gameplay');
+      setupPointerEvents();
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      clearLines();
+      AppState.isTransitioning = false;
+      AppState.selectedVehicleForTap = false;
+
+      const qIndex = AppState.currentQuestionIndex;
+      const vehicle = AppState.activeQuestions[qIndex];
+      const dict = I18N[AppState.lang];
+
+      document.getElementById('game-progress-text').innerText = `${qIndex + 1} / ${AppState.sessionLength}`;
+      document.getElementById('game-score-badge').innerText = AppState.score;
+      document.getElementById('game-prompt-text').innerText = dict.game_instruction_prompt;
+      document.getElementById('mascot-status-msg').innerText = dict.mascot_guide_ready;
+
+      // Papar imej watak kenderaan yang sah
+      const vehicleVisual = document.getElementById('vehicle-visual-box');
+      vehicleVisual.className = "w-48 h-36 sm:w-56 sm:h-40 flex items-center justify-center overflow-hidden transition-all duration-300";
+      vehicleVisual.innerHTML = `
+        <img 
+          id="current-vehicle-img"
+          src="${vehicle.img}" 
+          alt="${vehicle.name_ms}" 
+          class="max-w-full max-h-full object-contain filter drop-shadow-md select-none pointer-events-none transition-transform duration-300"
+          onerror="this.src='https://placehold.co/180x140/FFB800/FFFFFF?text=${encodeURIComponent(vehicle.name_en)}'"
+        />
+      `;
+      renderCurrentQuestionStrings();
+
+      const vCard = document.getElementById('vehicle-card');
+      vCard.classList.remove('ring-4', 'ring-emerald-400', 'ring-amber-400', 'shadow-glow-emerald');
+
+      // Jana 4 Pilihan Laluan (1 Laluan Betul + 3 Pengganggu rawak)
+      const allEnvKeys = Object.keys(ENVIRONMENTS);
+      const distractorKeys = shuffleArray(allEnvKeys.filter(k => k !== vehicle.env)).slice(0, 3);
+      const roundOptions = shuffleArray([vehicle.env, ...distractorKeys]);
+
+      const destSlots = document.getElementById('destination-slots');
+      destSlots.innerHTML = '';
+
+      roundOptions.forEach(envKey => {
+        const envData = ENVIRONMENTS[envKey];
+        const envLabel = dict[`env_${envKey}`];
+
+        const card = document.createElement('div');
+        card.className = `destination-card relative bg-white/95 rounded-2xl p-2.5 sm:p-3 border-3 ${envData.borderColor} shadow-candy-sm flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:scale-[1.03] active:scale-95 transition-all overflow-hidden`;
+        card.setAttribute('data-env', envKey);
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', envLabel);
+
+        card.innerHTML = `
+          <!-- Petunjuk Pintu Gerbang Laluan -->
+          <div class="dest-anchor absolute -left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-sky-400 border-2 border-white shadow-candy-sm hidden md:flex items-center justify-center">
+            <div class="w-3 h-3 rounded-full bg-sky-700"></div>
+          </div>
+          
+          <div class="w-14 h-11 sm:w-16 sm:h-12 rounded-xl overflow-hidden shadow-inner flex-shrink-0 bg-slate-100 flex items-center justify-center border border-slate-200">
+            <img 
+              src="${envData.img}" 
+              alt="${envLabel}" 
+              class="w-full h-full object-cover select-none pointer-events-none"
+              onerror="this.src='https://placehold.co/80x60/38BDF8/FFFFFF?text=${encodeURIComponent(envLabel)}'"
+            />
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <span class="block text-xs sm:text-base font-extrabold text-slate-800 truncate">${envLabel}</span>
+            <span class="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">${dict.travel_path_label}</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => handleDestinationCardTap(envKey, card));
+        destSlots.appendChild(card);
+      });
+    }
+
+    function renderCurrentQuestionStrings() {
+      const qIndex = AppState.currentQuestionIndex;
+      const vehicle = AppState.activeQuestions[qIndex];
+      if (!vehicle) return;
+
+      const isMs = AppState.lang === 'ms';
+      document.getElementById('vehicle-title-text').innerText = isMs ? vehicle.name_ms : vehicle.name_en;
+      document.getElementById('vehicle-desc-text').innerText = isMs ? vehicle.desc_ms : vehicle.desc_en;
+    }
+
+    function getElementCenterInSvg(el, svgEl) {
+      const rect = el.getBoundingClientRect();
+      const svgRect = svgEl.getBoundingClientRect();
+      return {
+        x: (rect.left + rect.width / 2) - svgRect.left,
+        y: (rect.top + rect.height / 2) - svgRect.top
+      };
+    }
+
+    function clearLines() {
+      document.getElementById('temp-line').setAttribute('d', '');
+      document.getElementById('permanent-line').setAttribute('d', '');
+    }
+
+    function updateTempLine(x1, y1, x2, y2) {
+      const tempPath = document.getElementById('temp-line');
+      const dx = (x2 - x1) * 0.5;
+      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+      tempPath.setAttribute('d', d);
+    }
+
+    function drawPermanentLine(x1, y1, x2, y2) {
+      const permPath = document.getElementById('permanent-line');
+      const dx = (x2 - x1) * 0.5;
+      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+      permPath.setAttribute('d', d);
+    }
+
+    function setupPointerEvents() {
+      const vehicleCard = document.getElementById('vehicle-card');
+      const svg = document.getElementById('connection-svg');
+
+      vehicleCard.onpointerdown = (e) => {
+        if (AppState.isTransitioning) return;
+        vehicleCard.setPointerCapture(e.pointerId);
+        AppState.isDragging = true;
+        AudioEngine.playSnap();
+
+        const startPt = getElementCenterInSvg(vehicleCard, svg);
+        AppState.dragStartPos = startPt;
+
+        vehicleCard.classList.add('ring-4', 'ring-amber-400', 'shadow-glow-gold');
+        updateTempLine(startPt.x, startPt.y, startPt.x, startPt.y);
+      };
+
+      vehicleCard.onpointermove = (e) => {
+        if (!AppState.isDragging || AppState.isTransitioning) return;
+        const svgRect = svg.getBoundingClientRect();
+        const curX = e.clientX - svgRect.left;
+        const curY = e.clientY - svgRect.top;
+
+        updateTempLine(AppState.dragStartPos.x, AppState.dragStartPos.y, curX, curY);
+
+        // Pengesanan magnetik berhampiran kad destinasi
+        const targetUnder = document.elementFromPoint(e.clientX, e.clientY);
+        const destCard = targetUnder ? targetUnder.closest('.destination-card') : null;
+        document.querySelectorAll('.destination-card').forEach(c => {
+          c.classList.remove('ring-4', 'ring-sky-400', 'bg-sky-50', 'scale-[1.04]');
+        });
+        if (destCard) {
+          destCard.classList.add('ring-4', 'ring-sky-400', 'bg-sky-50', 'scale-[1.04]');
+        }
+      };
+
+      vehicleCard.onpointerup = (e) => {
+        if (!AppState.isDragging) return;
+        AppState.isDragging = false;
+        vehicleCard.classList.remove('ring-4', 'ring-amber-400', 'shadow-glow-gold');
+        document.getElementById('temp-line').setAttribute('d', '');
+
+        const targetUnder = document.elementFromPoint(e.clientX, e.clientY);
+        const destCard = targetUnder ? targetUnder.closest('.destination-card') : null;
+        document.querySelectorAll('.destination-card').forEach(c => {
+          c.classList.remove('ring-4', 'ring-sky-400', 'bg-sky-50', 'scale-[1.04]');
+        });
+
+        if (destCard) {
+          const selectedEnv = destCard.getAttribute('data-env');
+          evaluateConnection(selectedEnv, destCard);
+        } else {
+          AppState.selectedVehicleForTap = true;
+          vehicleCard.classList.add('ring-4', 'ring-emerald-400');
+          showToast(I18N[AppState.lang].tap_destination_now);
+        }
+      };
+
+      vehicleCard.onpointercancel = () => {
+        AppState.isDragging = false;
+        vehicleCard.classList.remove('ring-4', 'ring-amber-400', 'shadow-glow-gold');
+        document.getElementById('temp-line').setAttribute('d', '');
+      };
+    }
+
+    function handleDestinationCardTap(selectedEnv, cardElement) {
+      if (AppState.isTransitioning) return;
+      evaluateConnection(selectedEnv, cardElement);
+    }
+
+    function evaluateConnection(selectedEnv, cardElement) {
+      if (AppState.isTransitioning) return;
+      const currentVehicle = AppState.activeQuestions[AppState.currentQuestionIndex];
+      const isCorrect = selectedEnv === currentVehicle.env;
+      const svg = document.getElementById('connection-svg');
+      const vCard = document.getElementById('vehicle-card');
+      const dict = I18N[AppState.lang];
+
+      AppState.totalAnswerAttempts += 1;
+
+      const p1 = getElementCenterInSvg(vCard, svg);
+      const p2 = getElementCenterInSvg(cardElement, svg);
+
+      if (isCorrect) {
+        // Sambungan Betul: +10 Mata
+        AppState.isTransitioning = true;
+        AppState.score += 10;
+        AppState.correctAnswersInSession += 1;
+        document.getElementById('game-score-badge').innerText = AppState.score;
+
+        AudioEngine.playSuccess();
+        AudioEngine.playEngineRev();
+        drawPermanentLine(p1.x, p1.y, p2.x, p2.y);
+
+        cardElement.classList.add('ring-4', 'ring-emerald-500', 'bg-emerald-50', 'shadow-glow-emerald');
+        vCard.classList.add('ring-4', 'ring-emerald-500');
+
+        // Animasi kinetik: Kenderaan meluncur ke portal laluan
+        const vBox = document.getElementById('vehicle-visual-box');
+        vBox.classList.add('drive-launching');
+
+        document.getElementById('game-prompt-text').innerText = dict.feedback_correct;
+        document.getElementById('mascot-status-msg').innerText = dict.feedback_correct;
+
+        setTimeout(() => {
+          advanceNextQuestion();
+        }, 1300);
+      } else {
+        // Percubaan Kurang Tepat: 0 Pemotongan Markah
+        AudioEngine.playWrong();
+        cardElement.classList.add('ring-4', 'ring-rose-400', 'bg-rose-50');
+        document.getElementById('game-prompt-text').innerText = dict.feedback_wrong;
+        document.getElementById('mascot-status-msg').innerText = dict.feedback_wrong;
+
+        setTimeout(() => {
+          cardElement.classList.remove('ring-4', 'ring-rose-400', 'bg-rose-50');
+          document.getElementById('temp-line').setAttribute('d', '');
+        }, 800);
+      }
+    }
+
+    function advanceNextQuestion() {
+      AppState.currentQuestionIndex += 1;
+      if (AppState.currentQuestionIndex >= AppState.sessionLength) {
+        finishGameSession();
+      } else {
+        renderCurrentQuestion();
+      }
+    }
+
+    function finishGameSession() {
+      AudioEngine.playSuccess();
+
+      const accuracy = AppState.totalAnswerAttempts > 0
+        ? Math.round((AppState.correctAnswersInSession / AppState.totalAnswerAttempts) * 100)
+        : 100;
+
+      document.getElementById('res-score-val').innerText = AppState.score;
+      document.getElementById('res-accuracy-val').innerText = `${accuracy}%`;
+
+      AppState.saveStats(AppState.score, AppState.sessionLength, AppState.correctAnswersInSession);
+      navTo('results');
+    }
+
+    function buildCollectionGrid() {
+      const container = document.getElementById('collection-grid');
+      container.innerHTML = '';
+      const isMs = AppState.lang === 'ms';
+      const dict = I18N[AppState.lang];
+
+      VEHICLES_DATABASE.forEach(vehicle => {
+        const envLabel = dict[`env_${vehicle.env}`];
+        const name = isMs ? vehicle.name_ms : vehicle.name_en;
+        const desc = isMs ? vehicle.desc_ms : vehicle.desc_en;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-3 border-2 border-slate-200 shadow-candy-sm flex flex-col items-center text-center transition-transform hover:scale-105';
+        card.innerHTML = `
+          <div class="w-full h-24 sm:h-28 flex items-center justify-center overflow-hidden p-1">
+            <img 
+              src="${vehicle.img}" 
+              alt="${name}" 
+              class="max-w-full max-h-full object-contain filter drop-shadow-sm select-none"
+              onerror="this.src='https://placehold.co/120x100/FFB800/FFFFFF?text=${encodeURIComponent(name)}'"
+            />
+          </div>
+          <span class="mt-2 text-xs sm:text-sm font-extrabold text-sky-950 leading-tight">${name}</span>
+          <span class="text-[10px] font-semibold text-slate-500 mb-2 leading-tight">${desc}</span>
+          <div class="mt-auto w-full px-2 py-1 rounded-xl bg-sky-50 border border-sky-200 text-[10px] sm:text-xs font-bold text-sky-800">
+            ${envLabel}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function savePlayerName() {
+      AudioEngine.playClick();
+      const val = document.getElementById('input-player-name').value.trim();
+      localStorage.setItem(AppState.storageKeys.player, val);
+      showToast(I18N[AppState.lang].saved_success);
+    }
+
+    function saveStudentProfile(e) {
+      if (e) e.preventDefault();
+      AudioEngine.playClick();
+      const payload = {
+        name: document.getElementById('input-student-fullname').value.trim(),
+        class: document.getElementById('input-student-class').value.trim(),
+        school: document.getElementById('input-student-school').value.trim()
+      };
+      localStorage.setItem(AppState.storageKeys.student, JSON.stringify(payload));
+      showToast(I18N[AppState.lang].saved_success);
+      setTimeout(() => navTo('home'), 600);
+    }
+
+    function saveFamilyCode(e) {
+      if (e) e.preventDefault();
+      AudioEngine.playClick();
+      const code = document.getElementById('input-family-code').value.trim();
+      localStorage.setItem(AppState.storageKeys.family, code);
+      showToast(I18N[AppState.lang].saved_success);
+      setTimeout(() => navTo('home'), 600);
+    }
+
+    /* Inisialisasi Aplikasi */
+    window.onload = function() {
+      AppState.init();
+    };
+
+    window.onresize = function() {
+      if (AppState.screen === 'gameplay' && !AppState.isDragging) {
+        clearLines();
+      }
+    };
+  </script>
+</body>
+</html>
